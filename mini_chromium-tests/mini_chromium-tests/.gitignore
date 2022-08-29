@@ -1,0 +1,5 @@
+mini_chromium-tests
+
+# Testscript output directory (can be symlink).
+#
+test-mini_chromium-tests

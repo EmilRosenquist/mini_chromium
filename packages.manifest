@@ -1,2 +1,4 @@
 : 1
 location: mini_chromium/
+:
+location: mini_chromium-tests/

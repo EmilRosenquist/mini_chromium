@@ -1,0 +1,6 @@
+import libs = mini_chromium%lib{mini_chromium}
+import libs += gtest%lib{gtest}
+
+exe{mini_chromium-tests}: testing/{hxx cxx}{**} $libs
+
+cxx.poptions =+ "-I$out_root" "-I$src_root"
