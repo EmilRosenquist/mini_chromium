@@ -40,7 +40,7 @@ hxx{export}@./: cxx.importable = false
 
 # Build options.
 #
-cxx.poptions =+ "-I$out_root/mini_chromium"
+cxx.poptions =+ "-I$src_root/mini_chromium"
 
 {hbmia obja}{*}: cxx.poptions += -DMINI_CHROMIUM_STATIC_BUILD
 {hbmis objs}{*}: cxx.poptions += -DMINI_CHROMIUM_SHARED_BUILD
@@ -49,7 +49,7 @@ cxx.poptions =+ "-I$out_root/mini_chromium"
 #
 lib{mini_chromium}:
 {
-  cxx.export.poptions = "-I$out_root/mini_chromium"
+  cxx.export.poptions = "-I$src_root/mini_chromium"
   cxx.export.libs = $intf_libs
 }
 
