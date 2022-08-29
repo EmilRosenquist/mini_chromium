@@ -1,0 +1,6 @@
+$out_root/
+{
+  include mini_chromium/
+}
+
+export $out_root/mini_chromium/$import.target
