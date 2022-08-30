@@ -8,4 +8,3 @@ description-file: README.md
 url: https://chromium.googlesource.com/chromium/mini_chromium
 depends: * build2 >= 0.15.0
 depends: * bpkg >= 0.15.0
-depends: gtest ^1.11.0
