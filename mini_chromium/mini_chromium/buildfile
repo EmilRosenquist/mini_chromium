@@ -115,11 +115,11 @@ if ($cxx.target.class == 'macos')
 }
 
 cxx.libs += $platform_libs
-cxx.poptions =+ "-I$src_root/mini_chromium"
+cxx.poptions =+ "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"
 
 lib{mini_chromium}:
 {
-  cxx.export.poptions = "-I$src_root/mini_chromium"
+  cxx.export.poptions = "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"
   cxx.export.libs = $platform_libs
 }
 
@@ -137,6 +137,30 @@ for n: $macos_mm
 
 liba{mini_chromium}: obja{$regex.apply($macos_mm,'(.+)','\1.a.o')}:  include = ($cxx.target.class == 'macos')
 libs{mini_chromium}: objs{$regex.apply($macos_mm,'(.+)','\1.so.o')}: include = ($cxx.target.class == 'macos')
+
+obja{~'/(.*).a/'}: mm{~'/\1/'}
+{{
+  depdb dyndep "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"  \
+               --what=header --default-type=h                           \
+               -- $cxx.path $cc.poptions $cxx.poptions                  \
+               $cc.coptions $cxx.coptions $cxx.mode -M -MG $path($<[0])
+  diag obj-c++ ($<[0])
+  $cxx.path $cc.poptions $cxx.poptions                                  \
+            $cc.coptions $cxx.coptions $cxx.mode                        \
+            -o $path($>) -c -x objective-c++ $path($<[0])
+}}
+
+objs{~'/(.*).so/'}: mm{~'/\1/'}
+{{
+  depdb dyndep "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"  \
+               --what=header --default-type=h                           \
+               -- $cxx.path $cc.poptions $cxx.poptions                  \
+               $cc.coptions $cxx.coptions $cxx.mode -M -MG $path($<[0])
+  diag obj-c++ ($<[0])
+  $cxx.path $cc.poptions $cxx.poptions                                  \
+            $cc.coptions $cxx.coptions $cxx.mode                        \
+            -o $path($>) -c -x objective-c++ $path($<[0])
+}}
 
 # For pre-releases use the complete version to make sure they cannot be used
 # in place of another pre-release or the final version. See the version module
