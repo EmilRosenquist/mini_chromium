@@ -117,10 +117,20 @@ if ($cxx.target.class == 'macos')
 cxx.libs += $platform_libs
 cxx.poptions =+ "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"
 
+if ($cxx.target.class == 'windows')
+{
+  cxx.poptions += -DUNICODE -D_UNICODE -D_HAS_EXCEPTIONS=0 -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX -DWIN32_LEAN_AND_MEAN
+}
+
 lib{mini_chromium}:
 {
   cxx.export.poptions = "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"
   cxx.export.libs = $platform_libs
+}
+
+if ($cxx.target.class == 'windows')
+{
+  lib{mini_chromium}: cxx.export.poptions += -DUNICODE -D_UNICODE -D_HAS_EXCEPTIONS=0 -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX -DWIN32_LEAN_AND_MEAN
 }
 
 define mm: file
