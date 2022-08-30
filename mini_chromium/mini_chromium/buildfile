@@ -1,34 +1,102 @@
-common_headers = atomicops atomicops_internals_atomicword_compat atomicops_internals_portable auto_reset bit_cast  \
-                 check check_op compiler_specific cxx17_backports debug/alias files/file_path files/scoped_file    \
-                 format_macros logging memory/free_deleter memory/page_size memory/scoped_policy                   \
-                 metrics/histogram_functions metrics/histogram_macros metrics/persistent_histogram_allocator       \
-                 notreached numerics/checked_math numerics/checked_math_impl numerics/clamped_math                 \
-                 numerics/clamped_math_impl numerics/safe_conversions numerics/safe_conversions_arm_impl           \
-                 numerics/safe_conversions_impl numerics/safe_math numerics/safe_math_arm_impl                     \
-                 numerics/safe_math_clang_gcc_impl numerics/safe_math_shared_impl process/memory rand_util         \
-                 scoped_clear_last_error scoped_generic strings/string_number_conversions strings/string_piece     \
-                 strings/string_util strings/stringprintf strings/sys_string_conversions                           \
-                 strings/utf_string_conversion_utils strings/utf_string_conversions                                \
-                 synchronization/condition_variable synchronization/lock synchronization/lock_impl sys_byteorder   \
-                 template_util third_party/icu/icu_utf threading/thread_local_storage
-common_source =  debug/alias files/file_path files/scoped_file logging process/memory rand_util                    \
-                 strings/string_number_conversions strings/stringprintf strings/utf_string_conversion_utils        \
-                 strings/utf_string_conversions synchronization/lock third_party/icu/icu_utf                       \
+common_headers = atomicops                                        \
+                 atomicops_internals_atomicword_compat            \
+                 atomicops_internals_portable                     \
+                 auto_reset                                       \
+                 bit_cast                                         \
+                 check                                            \
+                 check_op                                         \
+                 compiler_specific                                \
+                 cxx17_backports                                  \
+                 debug/alias                                      \
+                 files/file_path                                  \
+                 files/scoped_file                                \
+                 format_macros                                    \
+                 logging                                          \
+                 memory/free_deleter                              \
+                 memory/page_size                                 \
+                 memory/scoped_policy                             \
+                 metrics/histogram_functions                      \
+                 metrics/histogram_macros                         \
+                 metrics/persistent_histogram_allocator           \
+                 notreached                                       \
+                 numerics/checked_math                            \
+                 numerics/checked_math_impl                       \
+                 numerics/clamped_math                            \
+                 numerics/clamped_math_impl                       \
+                 numerics/safe_conversions                        \
+                 numerics/safe_conversions_arm_impl               \
+                 numerics/safe_conversions_impl                   \
+                 numerics/safe_math                               \
+                 numerics/safe_math_arm_impl                      \
+                 numerics/safe_math_clang_gcc_impl                \
+                 numerics/safe_math_shared_impl                   \
+                 process/memory                                   \
+                 rand_util                                        \
+                 scoped_clear_last_error                          \
+                 scoped_generic                                   \
+                 strings/string_number_conversions                \
+                 strings/string_piece                             \
+                 strings/string_util                              \
+                 strings/stringprintf                             \
+                 strings/sys_string_conversions                   \
+                 strings/utf_string_conversion_utils              \
+                 strings/utf_string_conversions                   \
+                 synchronization/condition_variable               \
+                 synchronization/lock                             \
+                 synchronization/lock_impl                        \
+                 sys_byteorder                                    \
+                 template_util                                    \
+                 third_party/icu/icu_utf                          \
+                 threading/thread_local_storage         
+
+common_source =  debug/alias                                      \
+                 files/file_path                                  \
+                 files/scoped_file                                \
+                 logging                                          \
+                 process/memory                                   \
+                 rand_util                                        \
+                 strings/string_number_conversions                \
+                 strings/stringprintf                             \
+                 strings/utf_string_conversion_utils              \
+                 strings/utf_string_conversions                   \
+                 synchronization/lock                             \
+                 third_party/icu/icu_utf                          \
                  threading/thread_local_storage
 
-posix_fuchsia_headers = posix/eintr_wrapper posix/safe_strerror strings/string_util_posix
-posix_fuchsia_source  = files/file_util_posix memory/page_size_posix posix/safe_strerror                           \
-                        synchronization/condition_variable_posix synchronization/lock_impl_posix                   \
+posix_fuchsia_headers = posix/eintr_wrapper                       \
+                        posix/safe_strerror                       \
+                        strings/string_util_posix
+
+posix_fuchsia_source  = files/file_util_posix                     \
+                        memory/page_size_posix                    \
+                        posix/safe_strerror                       \
+                        synchronization/condition_variable_posix  \
+                        synchronization/lock_impl_posix           \
                         threading/thread_local_storage_posix
 
 windows_headers = strings/string_util_win
-windows_source  = memory/page_size_win scoped_clear_last_error_win strings/string_util_win                         \
-                  synchronization/lock_impl_win threading/thread_local_storage_win
 
-mac_headers = mac/foundation_util mac/mach_logging mac/scoped_cftyperef mac/scoped_ioobject mac/scoped_launch_data \
-              mac/scoped_mach_port mac/scoped_mach_vm mac/scoped_nsautorelease_pool mac/scoped_nsobject            \
+windows_source  = memory/page_size_win                            \
+                  scoped_clear_last_error_win                     \
+                  strings/string_util_win                         \
+                  synchronization/lock_impl_win                   \
+                  threading/thread_local_storage_win
+
+mac_headers = mac/foundation_util                                 \
+              mac/mach_logging                                    \
+              mac/scoped_cftyperef                                \
+              mac/scoped_ioobject                                 \
+              mac/scoped_launch_data                              \
+              mac/scoped_mach_port                                \
+              mac/scoped_mach_vm                                  \
+              mac/scoped_nsautorelease_pool                       \
+              mac/scoped_nsobject                                 \
               mac/scoped_typeref
-mac_source = mac/close_nocancel mac/mach_logging mac/scoped_mach_port mac/scoped_mach_vm
+              
+mac_source = mac/close_nocancel                                   \
+             mac/mach_logging                                     \
+             mac/scoped_mach_port                                 \
+             mac/scoped_mach_vm
 
 lib{mini_chromium}: base/{hxx}{$common_headers} base/{cxx}{$common_source}
 lib{mini_chromium}: base/{hxx}{$posix_fuchsia_headers} base/{cxx}{$posix_fuchsia_source}: include = ($cxx.target.class != 'windows')
