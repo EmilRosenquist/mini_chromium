@@ -11,50 +11,74 @@ common_headers = atomicops atomicops_internals_atomicword_compat atomicops_inter
                  strings/utf_string_conversion_utils strings/utf_string_conversions                                \
                  synchronization/condition_variable synchronization/lock synchronization/lock_impl sys_byteorder   \
                  template_util third_party/icu/icu_utf threading/thread_local_storage
-
 common_source =  debug/alias files/file_path files/scoped_file logging process/memory rand_util                    \
                  strings/string_number_conversions strings/stringprintf strings/utf_string_conversion_utils        \
                  strings/utf_string_conversions synchronization/lock third_party/icu/icu_utf                       \
                  threading/thread_local_storage
 
-lib{mini_chromium}: base/{hxx}{$common_headers} base/{cxx}{$common_source}
-
 posix_fuchsia_headers = posix/eintr_wrapper posix/safe_strerror strings/string_util_posix
-
 posix_fuchsia_source  = files/file_util_posix memory/page_size_posix posix/safe_strerror                           \
                         synchronization/condition_variable_posix synchronization/lock_impl_posix                   \
                         threading/thread_local_storage_posix
 
-lib{mini_chromium}: base/{hxx}{$posix_fuchsia_headers} base/{cxx}{$posix_fuchsia_source}: include = ($cxx.target.class != 'windows')
-
 windows_headers = strings/string_util_win
-
 windows_source  = memory/page_size_win scoped_clear_last_error_win strings/string_util_win                         \
                   synchronization/lock_impl_win threading/thread_local_storage_win
 
-lib{mini_chromium}: base/{hxx}{$windows_headers} base/{cxx}{$windows_source}: include = ($cxx.target.class == 'windows')
+mac_headers = mac/foundation_util mac/mach_logging mac/scoped_cftyperef mac/scoped_ioobject mac/scoped_launch_data \
+              mac/scoped_mach_port mac/scoped_mach_vm mac/scoped_nsautorelease_pool mac/scoped_nsobject            \
+              mac/scoped_typeref
+mac_source = mac/close_nocancel mac/mach_logging mac/scoped_mach_port mac/scoped_mach_vm
 
-# TODO MAC/IOS headers
+lib{mini_chromium}: base/{hxx}{$common_headers} base/{cxx}{$common_source}
+lib{mini_chromium}: base/{hxx}{$posix_fuchsia_headers} base/{cxx}{$posix_fuchsia_source}: include = ($cxx.target.class != 'windows')
+lib{mini_chromium}: base/{hxx}{$windows_headers} base/{cxx}{$windows_source}: include = ($cxx.target.class == 'windows')
+lib{mini_chromium}: base/{hxx}{$mac_headers} base/{cxx}{$mac_source}: include = ($cxx.target.class == 'macos')
 
 hxx{export}@./: cxx.importable = false
 
+if ($cxx.target.class == 'macos')
+{
+  platform_libs = -framework ApplicationServices -framework CoreFoundation -framework Foundation -framework IOKit -framework Security
+}
 # Build options.
 #
+cxx.libs += $platform_libs
 cxx.poptions =+ "-I$src_root/mini_chromium"
-
-{hbmia obja}{*}: cxx.poptions += -DMINI_CHROMIUM_STATIC_BUILD
-{hbmis objs}{*}: cxx.poptions += -DMINI_CHROMIUM_SHARED_BUILD
 
 # Export options.
 #
 lib{mini_chromium}:
 {
   cxx.export.poptions = "-I$src_root/mini_chromium"
-  cxx.export.libs = $intf_libs
+  cxx.export.libs = $intf_libs $platform_libs
 }
 
-liba{mini_chromium}: cxx.export.poptions += -DMINI_CHROMIUM_STATIC
-libs{mini_chromium}: cxx.export.poptions += -DMINI_CHROMIUM_SHARED
+if ($cxx.target.class == 'macos')
+{
+  define mm: file
+  mm{*}: extension = mm
+
+  objcxx_files = mm{**}
+  obj_dyn =
+  obj_stat =
+
+  for file: $objcxx_files
+  {
+    p = "$directory($file)/$name($file)"
+    oa = "$(p).a.o"
+    os = "$(p).so.o"
+    obja{$oa}: $file
+    objs{$os}: $file
+
+    obj_dyn += $os
+    obj_stat += $oa
+  }
+
+  liba{mini_chromium}: obja{$obj_stat}
+  libs{mini_chromium}: objs{$obj_dyn}
+}
+
 
 # For pre-releases use the complete version to make sure they cannot be used
 # in place of another pre-release or the final version. See the version module
