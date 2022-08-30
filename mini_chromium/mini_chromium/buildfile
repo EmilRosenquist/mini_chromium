@@ -39,46 +39,36 @@ hxx{export}@./: cxx.importable = false
 
 if ($cxx.target.class == 'macos')
 {
-  platform_libs = -framework ApplicationServices -framework CoreFoundation -framework Foundation -framework IOKit -framework Security
+  platform_libs = -framework ApplicationServices \
+                  -framework CoreFoundation      \
+                  -framework Foundation          \
+                  -framework IOKit               \
+                  -framework Security
 }
-# Build options.
-#
+
 cxx.libs += $platform_libs
 cxx.poptions =+ "-I$src_root/mini_chromium"
 
-# Export options.
-#
 lib{mini_chromium}:
 {
   cxx.export.poptions = "-I$src_root/mini_chromium"
-  cxx.export.libs = $intf_libs $platform_libs
+  cxx.export.libs = $platform_libs
 }
 
-if ($cxx.target.class == 'macos')
+define mm: file
+mm{*}: extension = mm
+macos_mm = base/strings/sys_string_conversions_mac \
+           base/mac/scoped_nsautorelease_pool      \
+           base/mac/foundation_util
+
+for n: $macos_mm
 {
-  define mm: file
-  mm{*}: extension = mm
-
-  objcxx_files = mm{**}
-  obj_dyn =
-  obj_stat =
-
-  for file: $objcxx_files
-  {
-    p = "$directory($file)/$name($file)"
-    oa = "$(p).a.o"
-    os = "$(p).so.o"
-    obja{$oa}: $file
-    objs{$os}: $file
-
-    obj_dyn += $os
-    obj_stat += $oa
-  }
-
-  liba{mini_chromium}: obja{$obj_stat}
-  libs{mini_chromium}: objs{$obj_dyn}
+  obja{$(n).a.o}: mm{$n}
+  objs{$(n).so.o}: mm{$n}
 }
 
+liba{mini_chromium}: obja{$regex.apply($macos_mm,'(.+)','\1.a.o')}:  include = ($cxx.target.class == 'macos')
+libs{mini_chromium}: objs{$regex.apply($macos_mm,'(.+)','\1.so.o')}: include = ($cxx.target.class == 'macos')
 
 # For pre-releases use the complete version to make sure they cannot be used
 # in place of another pre-release or the final version. See the version module
