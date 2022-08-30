@@ -17,3 +17,18 @@
 # Use `binary` to make sure certain files are never auto-detected as text.
 #
 #*.png binary
+
+mini_chromium/mini_chromium/build symlink=dir
+mini_chromium/mini_chromium/base/debug symlink=dir
+mini_chromium/mini_chromium/base/files symlink=dir
+mini_chromium/mini_chromium/base/fuchsia symlink=dir
+mini_chromium/mini_chromium/base/mac symlink=dir
+mini_chromium/mini_chromium/base/memory symlink=dir
+mini_chromium/mini_chromium/base/metrics symlink=dir
+mini_chromium/mini_chromium/base/numerics symlink=dir
+mini_chromium/mini_chromium/base/posix symlink=dir
+mini_chromium/mini_chromium/base/process symlink=dir
+mini_chromium/mini_chromium/base/strings symlink=dir
+mini_chromium/mini_chromium/base/synchronization symlink=dir
+mini_chromium/mini_chromium/base/third_party symlink=dir
+mini_chromium/mini_chromium/base/threading symlink=dir
