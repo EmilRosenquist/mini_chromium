@@ -7,11 +7,12 @@
 int main()
 {
     {
-        const auto filepath = base::FilePath("path/to/file");
 #if BUILDFLAG(IS_POSIX)
+        const auto filepath = base::FilePath("path/to/file");
         assert(std::string("file") == filepath.BaseName().value());
 #elif BUILDFLAG(IS_WIN)
-        assert(std::wstring("file") == filepath.BaseName().value());
+        const auto filepath = base::FilePath(L"path/to/file");
+        assert(std::wstring(L"file") == filepath.BaseName().value());
 #endif        
     }
 }
