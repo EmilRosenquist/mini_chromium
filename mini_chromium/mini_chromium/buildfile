@@ -121,10 +121,17 @@ switch $cxx.target.class
   }
   case 'linux'
   {
+    cxx.poptions += -D_FILE_OFFSET_BITS=64
     cxx.libs += -lpthread
   }
   case 'windows'
   {
+    cxx.poptions += -DUNICODE  \
+                    -D_UNICODE \
+                    -D_HAS_EXCEPTIONS=0 \
+                    -D_CRT_SECURE_NO_WARNINGS \
+                    -DNOMINMAX \
+                    -DWIN32_LEAN_AND_MEAN
     cxx.libs = kernel32.lib \
                advapi32.lib
   }
@@ -134,18 +141,14 @@ switch $cxx.id
 {
   case 'gcc'
   {
-    cxx.poptions += -D_FILE_OFFSET_BITS=64
     cxx.coptions += -Wall \
                     -Wendif-labels \
                     -Werror \
                     -Wextra \
                     -Wextra-semi \
-                    -Wheader-hygiene \
-                    -Wnewline-eof \
                     -Wno-missing-field-initializers \
                     -Wno-unused-parameter \
                     -Wsign-compare \
-                    -Wstring-conversion \
                     -Wvla \
                     -fno-exceptions \
                     -fno-rtti \
@@ -155,15 +158,14 @@ switch $cxx.id
                     -fvisibility-inlines-hidden \
                     -fvisibility=hidden
   }
+  case 'clang'
+  {
+    cxx.coptions += -Wheader-hygiene \
+                    -Wnewline-eof \
+                    -Wstring-conversion
+  }
   case 'msvc'
   {
-    cxx.poptions += -DUNICODE  \
-                    -D_UNICODE \
-                    -D_HAS_EXCEPTIONS=0 \
-                    -D_CRT_SECURE_NO_WARNINGS \
-                    -DNOMINMAX \
-                    -DWIN32_LEAN_AND_MEAN
-                    
     cxx.coptions += /FS \
                     /W4 \
                     /WX \
