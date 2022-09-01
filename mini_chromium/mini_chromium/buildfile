@@ -132,8 +132,11 @@ switch $cxx.target.class
                     -D_CRT_SECURE_NO_WARNINGS \
                     -DNOMINMAX \
                     -DWIN32_LEAN_AND_MEAN
-    cxx.libs = kernel32.lib \
-               advapi32.lib
+    if ($cxx.target.system != 'mingw32')
+    {
+      cxx.libs = kernel32.lib \
+                advapi32.lib
+    }
   }
 }
 
@@ -159,7 +162,8 @@ switch $cxx.id
   {
     cxx.coptions += -Wheader-hygiene \
                     -Wnewline-eof \
-                    -Wstring-conversion
+                    -Wstring-conversion \
+                    -Wno-ignored-pragma-optimize
   }
   case 'msvc'
   {
