@@ -287,7 +287,7 @@ void FilePath::StripTrailingSeparatorsInternal() {
 
 }  // namespace base
 
-#if !BUILDFLAG(IS_WIN) || (defined(_MSVC_LANG) && _MSVC_LANG < 202002L) 
+#if !BUILDFLAG(IS_WIN)
 void PrintTo(const base::FilePath& path, std::ostream* out) {
   *out << path.value().c_str();
 }

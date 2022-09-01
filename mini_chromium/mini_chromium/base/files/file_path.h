@@ -225,8 +225,8 @@ class FilePath {
 
 }  // namespace base
 
-// Patch for now since it doesnt build with msvc c++20.
-#if !BUILDFLAG(IS_WIN) || (defined(_MSVC_LANG) && _MSVC_LANG < 202002L) 
+// Patch for disabling it on windows until its fixed upstream.
+#if !BUILDFLAG(IS_WIN)
 // This is required by googletest to print a readable output on test failures.
 extern void PrintTo(const base::FilePath& path, std::ostream* out);
 #endif
