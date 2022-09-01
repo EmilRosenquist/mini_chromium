@@ -9,6 +9,7 @@ common_headers = atomicops                                        \
                  cxx17_backports                                  \
                  debug/alias                                      \
                  files/file_path                                  \
+                 files/file_util                                  \
                  files/scoped_file                                \
                  format_macros                                    \
                  logging                                          \
