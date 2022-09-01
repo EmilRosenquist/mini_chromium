@@ -121,7 +121,7 @@ switch $cxx.target.class
   }
   case 'linux'
   {
-    cxx.poptions += -D_FILE_OFFSET_BITS=64
+    cxx.poptions += -D_FILE_OFFSET_BITS=64 -fPIC
     cxx.libs += -lpthread
   }
   case 'windows'
