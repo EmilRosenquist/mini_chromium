@@ -109,51 +109,76 @@ lib{mini_chromium}: base/{hxx}{$mac_headers} base/{cxx}{$mac_source}: include = 
 libul{mini_chromium}: base/{hxx}{$common_headers} base/{cxx}{$common_source}: include = ($cxx.target.class == 'windows')
 libul{mini_chromium}: base/{hxx}{$windows_headers} base/{cxx}{$windows_source}: include = ($cxx.target.class == 'windows')
 
-if ($cxx.target.class == 'macos')
+switch $cxx.target.class
 {
-  platform_libs = -framework ApplicationServices \
-                  -framework CoreFoundation      \
-                  -framework Foundation          \
-                  -framework IOKit               \
-                  -framework Security
-}
-elif ($cxx.target.class == 'windows')
-{
-  platform_libs = kernel32.lib \
-                  advapi32.lib
-}
-elif ($cxx.target.class == 'linux')
-{
-  platform_libs = -lpthread
-}
-
-if ($cxx.id == 'msvc')
-{
-  flags = -DUNICODE \
-          -D_UNICODE \
-          -D_HAS_EXCEPTIONS=0 \
-          -D_CRT_SECURE_NO_WARNINGS \
-          -DNOMINMAX \
-          -DWIN32_LEAN_AND_MEAN \
-          /FS \
-          /W4 \
-          /WX \
-          /Zi \
-          /bigobj \
-          /wd4100 \
-          /wd4127 \
-          /wd4324 \
-          /wd4351 \
-          /wd4577 \
-          /wd4996
-}
-elif ($cxx.id == 'gcc')
-{
-  flags = -D_FILE_OFFSET_BITS=64
+  case 'macos'
+  {
+    cxx.libs = -framework ApplicationServices \
+               -framework CoreFoundation      \
+               -framework Foundation          \
+               -framework IOKit               \
+               -framework Security
+  }
+  case 'linux'
+  {
+    cxx.libs += -lpthread
+  }
+  case 'windows'
+  {
+    cxx.libs = kernel32.lib \
+               advapi32.lib
+  }
 }
 
-cxx.libs += $platform_libs
-cxx.poptions =+ "-I$out_root/mini_chromium" "-I$src_root/mini_chromium" $flags
+switch $cxx.id
+{
+  case 'gcc'
+  {
+    cxx.poptions += -D_FILE_OFFSET_BITS=64
+    cxx.coptions += -Wall \
+                    -Wendif-labels \
+                    -Werror \
+                    -Wextra \
+                    -Wextra-semi \
+                    -Wheader-hygiene \
+                    -Wnewline-eof \
+                    -Wno-missing-field-initializers \
+                    -Wno-unused-parameter \
+                    -Wsign-compare \
+                    -Wstring-conversion \
+                    -Wvla \
+                    -fno-exceptions \
+                    -fno-rtti \
+                    -fno-strict-aliasing \
+                    -fobjc-call-cxx-cdtors \
+                    -fstack-protector-all \
+                    -fvisibility-inlines-hidden \
+                    -fvisibility=hidden
+  }
+  case 'msvc'
+  {
+    cxx.poptions += -DUNICODE  \
+                    -D_UNICODE \
+                    -D_HAS_EXCEPTIONS=0 \
+                    -D_CRT_SECURE_NO_WARNINGS \
+                    -DNOMINMAX \
+                    -DWIN32_LEAN_AND_MEAN
+                    
+    cxx.coptions += /FS \
+                    /W4 \
+                    /WX \
+                    /Zi \
+                    /bigobj \
+                    /wd4100 \
+                    /wd4127 \
+                    /wd4324 \
+                    /wd4351 \
+                    /wd4577 \
+                    /wd4996
+  }
+}
+
+cxx.poptions =+ "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"
 
 libs{mini_chromium}: def{mini_chromium}: include = ($cxx.target.system == 'win32-msvc')
 def{mini_chromium}: libul{mini_chromium}
@@ -162,48 +187,50 @@ if ($cxx.target.system == 'mingw32')
 
 lib{mini_chromium}:
 {
-  cxx.export.poptions = "-I$out_root/mini_chromium" "-I$src_root/mini_chromium" $flags
+  cxx.export.poptions = "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"
 }
 
-define mm: file
-mm{*}: extension = mm
-macos_mm = base/strings/sys_string_conversions_mac \
-           base/mac/scoped_nsautorelease_pool      \
-           base/mac/foundation_util
-
-for n: $macos_mm
+if ($cxx.target.class == 'macos')
 {
-  obja{$(n).a.o}: mm{$n}
-  objs{$(n).so.o}: mm{$n}
+  define mm: file
+  mm{*}: extension = mm
+  macos_mm = base/strings/sys_string_conversions_mac \
+            base/mac/scoped_nsautorelease_pool      \
+            base/mac/foundation_util
+
+  for n: $macos_mm
+  {
+    obja{$(n).a.o}: mm{$n}
+    objs{$(n).so.o}: mm{$n}
+  }
+
+  liba{mini_chromium}: obja{$regex.apply($macos_mm,'(.+)','\1.a.o')}:  include = ($cxx.target.class == 'macos')
+  libs{mini_chromium}: objs{$regex.apply($macos_mm,'(.+)','\1.so.o')}: include = ($cxx.target.class == 'macos')
+
+  obja{~'/(.*).a/'}: mm{~'/\1/'}
+  {{
+    depdb dyndep "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"  \
+                --what=header --default-type=h                           \
+                -- $cxx.path $cc.poptions $cxx.poptions                  \
+                $cc.coptions $cxx.coptions $cxx.mode -M -MG $path($<[0])
+    diag obj-c++ ($<[0])
+    $cxx.path $cc.poptions $cxx.poptions                                  \
+              $cc.coptions $cxx.coptions $cxx.mode                        \
+              -o $path($>) -c -x objective-c++ $path($<[0])
+  }}
+
+  objs{~'/(.*).so/'}: mm{~'/\1/'}
+  {{
+    depdb dyndep "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"  \
+                --what=header --default-type=h                           \
+                -- $cxx.path $cc.poptions $cxx.poptions                  \
+                $cc.coptions $cxx.coptions $cxx.mode -M -MG $path($<[0])
+    diag obj-c++ ($<[0])
+    $cxx.path $cc.poptions $cxx.poptions                                  \
+              $cc.coptions $cxx.coptions $cxx.mode                        \
+              -o $path($>) -c -x objective-c++ $path($<[0])
+  }}
 }
-
-liba{mini_chromium}: obja{$regex.apply($macos_mm,'(.+)','\1.a.o')}:  include = ($cxx.target.class == 'macos')
-libs{mini_chromium}: objs{$regex.apply($macos_mm,'(.+)','\1.so.o')}: include = ($cxx.target.class == 'macos')
-
-obja{~'/(.*).a/'}: mm{~'/\1/'}
-{{
-  depdb dyndep "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"  \
-               --what=header --default-type=h                           \
-               -- $cxx.path $cc.poptions $cxx.poptions                  \
-               $cc.coptions $cxx.coptions $cxx.mode -M -MG $path($<[0])
-  diag obj-c++ ($<[0])
-  $cxx.path $cc.poptions $cxx.poptions                                  \
-            $cc.coptions $cxx.coptions $cxx.mode                        \
-            -o $path($>) -c -x objective-c++ $path($<[0])
-}}
-
-objs{~'/(.*).so/'}: mm{~'/\1/'}
-{{
-  depdb dyndep "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"  \
-               --what=header --default-type=h                           \
-               -- $cxx.path $cc.poptions $cxx.poptions                  \
-               $cc.coptions $cxx.coptions $cxx.mode -M -MG $path($<[0])
-  diag obj-c++ ($<[0])
-  $cxx.path $cc.poptions $cxx.poptions                                  \
-            $cc.coptions $cxx.coptions $cxx.mode                        \
-            -o $path($>) -c -x objective-c++ $path($<[0])
-}}
-
 # For pre-releases use the complete version to make sure they cannot be used
 # in place of another pre-release or the final version. See the version module
 # for details on the version.* variable values.
