@@ -135,6 +135,11 @@ elif ($cxx.target.class == 'windows')
           /wd4577 \
           /wd4996
 }
+elif ($cxx.target.class == 'linux')
+{
+  platform_libs = -lpthread
+  flags = -D_FILE_OFFSET_BITS=64
+}
 
 cxx.libs += $platform_libs
 cxx.poptions =+ "-I$out_root/mini_chromium" "-I$src_root/mini_chromium" $flags
