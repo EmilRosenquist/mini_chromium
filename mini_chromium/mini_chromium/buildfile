@@ -47,7 +47,9 @@ common_headers = atomicops                                        \
                  sys_byteorder                                    \
                  template_util                                    \
                  third_party/icu/icu_utf                          \
-                 threading/thread_local_storage         
+                 threading/thread_local_storage                   \
+                 build/build_config                               \
+                 build/buildflag
 
 common_source =  debug/alias                                      \
                  files/file_path                                  \
@@ -118,7 +120,14 @@ elif ($cxx.target.class == 'windows')
 {
   platform_libs = kernel32.lib \
                   advapi32.lib
-                  
+}
+elif ($cxx.target.class == 'linux')
+{
+  platform_libs = -lpthread
+}
+
+if ($cxx.id == 'msvc')
+{
   flags = -DUNICODE \
           -D_UNICODE \
           -D_HAS_EXCEPTIONS=0 \
@@ -137,9 +146,8 @@ elif ($cxx.target.class == 'windows')
           /wd4577 \
           /wd4996
 }
-elif ($cxx.target.class == 'linux')
+elif ($cxx.id == 'gcc')
 {
-  platform_libs = -lpthread
   flags = -D_FILE_OFFSET_BITS=64
 }
 
