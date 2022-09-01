@@ -113,25 +113,35 @@ if ($cxx.target.class == 'macos')
                   -framework IOKit               \
                   -framework Security
 }
+elif ($cxx.target.class == 'windows')
+{
+  platform_libs = kernel32.lib \
+                  advapi32.lib
+                  
+  flags = -DUNICODE \
+          -D_UNICODE \
+          -D_HAS_EXCEPTIONS=0 \
+          -D_CRT_SECURE_NO_WARNINGS \
+          -DNOMINMAX -DWIN32_LEAN_AND_MEAN \
+          /FS \
+          /W4 \
+          /WX \
+          /Zi \
+          /bigobj \
+          /wd4100 \
+          /wd4127 \
+          /wd4324 \
+          /wd4351 \
+          /wd4577 \
+          /wd4996
+}
 
 cxx.libs += $platform_libs
-cxx.poptions =+ "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"
-
-if ($cxx.target.class == 'windows')
-{
-  cxx.libs += kernel32.lib
-  cxx.poptions += -DUNICODE -D_UNICODE -D_HAS_EXCEPTIONS=0 -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX -DWIN32_LEAN_AND_MEAN /FS /W4 /WX /Zi /bigobj /wd4100 /wd4127 /wd4324 /wd4351 /wd4577 /wd4996
-}
+cxx.poptions =+ "-I$out_root/mini_chromium" "-I$src_root/mini_chromium" $flags
 
 lib{mini_chromium}:
 {
-  cxx.export.poptions = "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"
-  cxx.export.libs += $platform_libs
-}
-
-if ($cxx.target.class == 'windows')
-{
-  lib{mini_chromium}: cxx.export.poptions += -DUNICODE -D_UNICODE -D_HAS_EXCEPTIONS=0 -D_CRT_SECURE_NO_WARNINGS -DNOMINMAX -DWIN32_LEAN_AND_MEAN /FS /W4 /WX /Zi /bigobj /wd4100 /wd4127 /wd4324 /wd4351 /wd4577 /wd4996
+  cxx.export.poptions = "-I$out_root/mini_chromium" "-I$src_root/mini_chromium" $flags
 }
 
 define mm: file
