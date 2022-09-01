@@ -141,8 +141,7 @@ switch $cxx.id
 {
   case 'gcc'
   {
-    cxx.coptions += -Wall \
-                    -Wendif-labels \
+    cxx.coptions += -Wendif-labels \
                     -Wextra \
                     -Wextra-semi \
                     -Wno-missing-field-initializers \
