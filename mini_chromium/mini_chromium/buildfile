@@ -106,8 +106,6 @@ lib{mini_chromium}: base/{hxx}{$mac_headers} base/{cxx}{$mac_source}: include = 
 libul{mini_chromium}: base/{hxx}{$common_headers} base/{cxx}{$common_source}: include = ($cxx.target.class == 'windows')
 libul{mini_chromium}: base/{hxx}{$windows_headers} base/{cxx}{$windows_source}: include = ($cxx.target.class == 'windows')
 
-hxx{export}@./: cxx.importable = false
-
 if ($cxx.target.class == 'macos')
 {
   platform_libs = -framework ApplicationServices \
