@@ -48,8 +48,8 @@ common_headers = atomicops                                        \
                  template_util                                    \
                  third_party/icu/icu_utf                          \
                  threading/thread_local_storage                   \
-                 build/build_config                               \
-                 build/buildflag
+                 ../build/build_config                            \
+                 ../build/buildflag
 
 common_source =  debug/alias                                      \
                  files/file_path                                  \
