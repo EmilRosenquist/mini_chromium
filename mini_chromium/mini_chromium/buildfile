@@ -98,10 +98,13 @@ mac_source = mac/close_nocancel                                   \
              mac/scoped_mach_port                                 \
              mac/scoped_mach_vm
 
-lib{mini_chromium}: libul{mini_chromium}: base/{hxx}{$common_headers} base/{cxx}{$common_source}
+lib{mini_chromium}: base/{hxx}{$common_headers} base/{cxx}{$common_source}
 lib{mini_chromium}: base/{hxx}{$posix_fuchsia_headers} base/{cxx}{$posix_fuchsia_source}: include = ($cxx.target.class != 'windows')
-lib{mini_chromium}: libul{mini_chromium}: base/{hxx}{$windows_headers} base/{cxx}{$windows_source}: include = ($cxx.target.class == 'windows')
+lib{mini_chromium}: base/{hxx}{$windows_headers} base/{cxx}{$windows_source}: include = ($cxx.target.class == 'windows')
 lib{mini_chromium}: base/{hxx}{$mac_headers} base/{cxx}{$mac_source}: include = ($cxx.target.class == 'macos')
+
+libul{mini_chromium}: base/{hxx}{$common_headers} base/{cxx}{$common_source}: include = ($cxx.target.class == 'windows')
+libul{mini_chromium}: base/{hxx}{$windows_headers} base/{cxx}{$windows_source}: include = ($cxx.target.class == 'windows')
 
 hxx{export}@./: cxx.importable = false
 
