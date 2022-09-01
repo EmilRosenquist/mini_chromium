@@ -20,7 +20,6 @@
 
 mini_chromium/mini_chromium/build symlink=dir
 mini_chromium/mini_chromium/base/debug symlink=dir
-mini_chromium/mini_chromium/base/files symlink=dir
 mini_chromium/mini_chromium/base/fuchsia symlink=dir
 mini_chromium/mini_chromium/base/mac symlink=dir
 mini_chromium/mini_chromium/base/memory symlink=dir
