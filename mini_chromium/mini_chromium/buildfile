@@ -95,7 +95,7 @@ mac_headers = mac/foundation_util                                 \
               mac/scoped_nsautorelease_pool                       \
               mac/scoped_nsobject                                 \
               mac/scoped_typeref
-              
+
 mac_source = mac/close_nocancel                                   \
              mac/mach_logging                                     \
              mac/scoped_mach_port                                 \
@@ -106,6 +106,10 @@ lib{mini_chromium}: base/{hxx}{$posix_fuchsia_headers} base/{cxx}{$posix_fuchsia
 lib{mini_chromium}: base/{hxx}{$windows_headers} base/{cxx}{$windows_source}: include = ($cxx.target.class == 'windows')
 lib{mini_chromium}: base/{hxx}{$mac_headers} base/{cxx}{$mac_source}: include = ($cxx.target.class == 'macos')
 
+# @@ Why are the same sources listed in both lib{} and libu{}? Normally
+#    for what you use libul{}, you would list all the sources in libul{},
+#    like in the example in the manual.
+#
 libul{mini_chromium}: base/{hxx}{$common_headers} base/{cxx}{$common_source}: include = ($cxx.target.class == 'windows')
 libul{mini_chromium}: base/{hxx}{$windows_headers} base/{cxx}{$windows_source}: include = ($cxx.target.class == 'windows')
 
@@ -121,19 +125,34 @@ switch $cxx.target.class
   }
   case 'linux'
   {
+
+    # @@ _FILE_OFFSET_BITS should be set by the user, not buildfile
+    #
+    # @@ -fPIC is set by the buildsystem automatically, if/when necessary
+    #
+    # @@ https://github.com/build2/HOWTO/blob/master/entries/link-pthread.md
+
     cxx.poptions += -D_FILE_OFFSET_BITS=64 -fPIC
     cxx.libs += -lpthread
   }
   case 'windows'
   {
+
+    # @@ I don't believe _HAS_EXCEPTIONS is doing anything. If you need to
+    #    disable exceptions, use appropriate compiler options (/EH for MSVC,
+    #    -fno-exceptions for GCC/Clanf).
+
     cxx.poptions += -DUNICODE  \
                     -D_UNICODE \
                     -D_HAS_EXCEPTIONS=0 \
                     -D_CRT_SECURE_NO_WARNINGS \
                     -DNOMINMAX \
                     -DWIN32_LEAN_AND_MEAN
+
     if ($cxx.target.system != 'mingw32')
     {
+      # @@ These are linked automatically.
+
       cxx.libs = kernel32.lib \
                 advapi32.lib
     }
@@ -144,6 +163,9 @@ switch $cxx.id
 {
   case 'gcc'
   {
+
+    # -fstack-protector-all should be decided by the user.
+
     cxx.coptions += -Wendif-labels \
                     -Wextra \
                     -Wextra-semi \
@@ -155,7 +177,6 @@ switch $cxx.id
                     -fno-exceptions \
                     -fno-rtti \
                     -fno-strict-aliasing \
-                    -fstack-protector-all \
                     -fvisibility-inlines-hidden \
                     -fvisibility=hidden
   }
@@ -168,11 +189,7 @@ switch $cxx.id
   }
   case 'msvc'
   {
-    cxx.coptions += /FS \
-                    /W4 \
-                    /WX \
-                    /Zi \
-                    /bigobj \
+    cxx.coptions += /W4 \
                     /wd4100 \
                     /wd4127 \
                     /wd4324 \
@@ -182,7 +199,7 @@ switch $cxx.id
   }
 }
 
-cxx.poptions =+ "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"
+cxx.poptions =+ "-I$out_base" "-I$src_base"
 
 libs{mini_chromium}: def{mini_chromium}: include = ($cxx.target.system == 'win32-msvc')
 def{mini_chromium}: libul{mini_chromium}
@@ -191,14 +208,14 @@ if ($cxx.target.system == 'mingw32')
 
 lib{mini_chromium}:
 {
-  cxx.export.poptions = "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"
+  cxx.export.poptions = "-I$out_base" "-I$src_base"
 }
 
 define mm: file
 mm{*}: extension = mm
 macos_mm = base/strings/sys_string_conversions_mac \
-          base/mac/scoped_nsautorelease_pool      \
-          base/mac/foundation_util
+           base/mac/scoped_nsautorelease_pool      \
+           base/mac/foundation_util
 
 for n: $macos_mm
 {
@@ -211,7 +228,7 @@ libs{mini_chromium}: objs{$regex.apply($macos_mm,'(.+)','\1.so.o')}: include = (
 
 obja{~'/(.*).a/'}: mm{~'/\1/'}
 {{
-  depdb dyndep "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"  \
+  depdb dyndep "-I$out_base" "-I$src_base"                             \
               --what=header --default-type=h                           \
               -- $cxx.path $cc.poptions $cxx.poptions                  \
               $cc.coptions $cxx.coptions $cxx.mode -M -MG $path($<[0])
@@ -223,7 +240,7 @@ obja{~'/(.*).a/'}: mm{~'/\1/'}
 
 objs{~'/(.*).so/'}: mm{~'/\1/'}
 {{
-  depdb dyndep "-I$out_root/mini_chromium" "-I$src_root/mini_chromium"  \
+  depdb dyndep "-I$out_base" "-I$src_base"                             \
               --what=header --default-type=h                           \
               -- $cxx.path $cc.poptions $cxx.poptions                  \
               $cc.coptions $cxx.coptions $cxx.mode -M -MG $path($<[0])
