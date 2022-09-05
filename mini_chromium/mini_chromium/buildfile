@@ -118,29 +118,13 @@ switch $cxx.target.class
                -framework IOKit               \
                -framework Security
   }
-  case 'linux'
-  {
-
-    # @@ _FILE_OFFSET_BITS should be set by the user, not buildfile
-
-    cxx.poptions += -D_FILE_OFFSET_BITS=64
-  }
   case 'windows'
   {
     cxx.poptions += -DUNICODE  \
                     -D_UNICODE \
-                    -D_HAS_EXCEPTIONS=0 \
                     -D_CRT_SECURE_NO_WARNINGS \
                     -DNOMINMAX \
                     -DWIN32_LEAN_AND_MEAN
-
-    if ($cxx.target.system != 'mingw32')
-    {
-      # @@ These are linked automatically.
-
-      cxx.libs = kernel32.lib \
-                advapi32.lib
-    }
   }
 }
 
