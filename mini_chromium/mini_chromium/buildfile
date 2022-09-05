@@ -128,11 +128,9 @@ switch $cxx.target.class
 
     # @@ _FILE_OFFSET_BITS should be set by the user, not buildfile
     #
-    # @@ -fPIC is set by the buildsystem automatically, if/when necessary
-    #
     # @@ https://github.com/build2/HOWTO/blob/master/entries/link-pthread.md
 
-    cxx.poptions += -D_FILE_OFFSET_BITS=64 -fPIC
+    cxx.poptions += -D_FILE_OFFSET_BITS=64
     cxx.libs += -lpthread
   }
   case 'windows'
