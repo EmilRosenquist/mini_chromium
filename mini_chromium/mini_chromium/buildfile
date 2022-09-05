@@ -127,19 +127,11 @@ switch $cxx.target.class
   {
 
     # @@ _FILE_OFFSET_BITS should be set by the user, not buildfile
-    #
-    # @@ https://github.com/build2/HOWTO/blob/master/entries/link-pthread.md
 
     cxx.poptions += -D_FILE_OFFSET_BITS=64
-    cxx.libs += -lpthread
   }
   case 'windows'
   {
-
-    # @@ I don't believe _HAS_EXCEPTIONS is doing anything. If you need to
-    #    disable exceptions, use appropriate compiler options (/EH for MSVC,
-    #    -fno-exceptions for GCC/Clanf).
-
     cxx.poptions += -DUNICODE  \
                     -D_UNICODE \
                     -D_HAS_EXCEPTIONS=0 \
@@ -161,9 +153,6 @@ switch $cxx.id
 {
   case 'gcc'
   {
-
-    # -fstack-protector-all should be decided by the user.
-
     cxx.coptions += -Wendif-labels \
                     -Wextra \
                     -Wextra-semi \
@@ -198,6 +187,9 @@ switch $cxx.id
 }
 
 cxx.poptions =+ "-I$out_base" "-I$src_base"
+
+if ($cxx.target.system != 'win32-msvc')
+  cxx.libs += -pthread
 
 libs{mini_chromium}: def{mini_chromium}: include = ($cxx.target.system == 'win32-msvc')
 def{mini_chromium}: libul{mini_chromium}
@@ -257,11 +249,14 @@ if $version.pre_release
 else
   lib{mini_chromium}: bin.lib.version = "-$version.major.$version.minor"
 
-# Install into the mini_chromium/ subdirectory of, say, /usr/include/
-# recreating subdirectories.
+# Install into the mini_chromium/ subdirectory of, say, /usr/include/. Note that
+# header is included as <base/...> so we need to add -I/usr/include/mini_chromium/base
+# to pkg-config.
 #
+lib{mini_chromium}: cxx.pkgconfig.include = include/mini_chromium/base
+
 {hxx ixx txx}{*}:
 {
-  install         = include/
+  install         = include/mini_chromium/
   install.subdirs = true
 }
