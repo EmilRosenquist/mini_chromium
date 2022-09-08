@@ -101,22 +101,45 @@ mac_source = mac/close_nocancel                                   \
              mac/scoped_mach_port                                 \
              mac/scoped_mach_vm
 
-./ lib{mini_chromium}: libul{mini_chromium}
+lib{mini_chromium}: libul{mini_chromium}
 
 libul{mini_chromium}: base/{hxx}{$common_headers} base/{cxx}{$common_source}
 libul{mini_chromium}: base/{hxx}{$windows_headers} base/{cxx}{$windows_source}: include = ($cxx.target.class == 'windows')
 libul{mini_chromium}: base/{hxx}{$posix_fuchsia_headers} base/{cxx}{$posix_fuchsia_source}: include = ($cxx.target.class != 'windows')
 libul{mini_chromium}: base/{hxx}{$mac_headers} base/{cxx}{$mac_source}: include = ($cxx.target.class == 'macos')
 
+# Upstream includes its headers as `<{base,build}/...>` which is pretty loose
+# since `base` and `build` have nothing to do with the library name and are
+# thus prone to clashes. While we have no choice but to support this, we can
+# at least also support the `<mini_chromium/{base,build}/...>` form (see also
+# the installed case below).
+#
+cxx.poptions =+ "-I$out_base" "-I$src_base"
+
+lib{mini_chromium}:
+{
+  cxx.export.poptions = "-I$out_root" "-I$src_root" \
+                        "-I$out_base" "-I$src_base"
+}
+
 switch $cxx.target.class
 {
   case 'macos'
   {
-    cxx.libs = -framework ApplicationServices \
-               -framework CoreFoundation      \
-               -framework Foundation          \
-               -framework IOKit               \
-               -framework Security
+    cxx.libs += -framework ApplicationServices \
+                -framework CoreFoundation      \
+                -framework Foundation          \
+                -framework IOKit               \
+                -framework Security
+  }
+  case 'linux'
+  {
+
+    # Upstream passes _FILE_OFFSET_BITS=64 but it's unclear whether it's an
+    # implementation detail or leaks into the interface, so let's omit for
+    # now.
+    #
+    #cxx.poptions += -D_FILE_OFFSET_BITS=64
   }
   case 'windows'
   {
@@ -125,15 +148,15 @@ switch $cxx.target.class
                     -D_CRT_SECURE_NO_WARNINGS \
                     -DNOMINMAX \
                     -DWIN32_LEAN_AND_MEAN
-                    
+
     if ($cxx.target.system != 'mingw32')
     {
-      cxx.libs = advapi32.lib
+      cxx.libs += advapi32.lib
     }
   }
 }
 
-switch $cxx.id
+switch $cxx.class
 {
   case 'gcc'
   {
@@ -148,19 +171,24 @@ switch $cxx.id
                     -fno-exceptions \
                     -fno-rtti \
                     -fno-strict-aliasing \
-                    -fvisibility-inlines-hidden \
-                    -fvisibility=hidden
-  }
-  case 'clang'
-  {
-    cxx.coptions += -Wheader-hygiene \
-                    -Wnewline-eof \
-                    -Wstring-conversion \
-                    -Wno-ignored-pragma-optimize
+
+    #               -fvisibility-inlines-hidden \
+    #               -fvisibility=hidden
+
+    if ($cxx.id == 'clang')
+    {
+      cxx.coptions += -Wheader-hygiene \
+                      -Wnewline-eof \
+                      -Wstring-conversion \
+                      -Wno-ignored-pragma-optimize
+    }
   }
   case 'msvc'
   {
-    cxx.coptions += /W4 \
+    # Note that upstream does not seem to disable RTTI (/GR).
+    #
+    cxx.coptions += /EHs- /EHc-\
+                    /W4 \
                     /wd4100 \
                     /wd4127 \
                     /wd4324 \
@@ -170,8 +198,6 @@ switch $cxx.id
   }
 }
 
-cxx.poptions =+ "-I$out_base" "-I$src_base"
-
 if ($cxx.target.system != 'win32-msvc')
   cxx.libs += -pthread
 
@@ -179,11 +205,6 @@ libs{mini_chromium}: def{mini_chromium}: include = ($cxx.target.system == 'win32
 def{mini_chromium}: libul{mini_chromium}
 if ($cxx.target.system == 'mingw32')
   cxx.loptions += -Wl,--export-all-symbols
-
-lib{mini_chromium}:
-{
-  cxx.export.poptions = "-I$out_base" "-I$src_base"
-}
 
 define mm: file
 mm{*}: extension = mm
@@ -233,11 +254,11 @@ if $version.pre_release
 else
   lib{mini_chromium}: bin.lib.version = "-$version.major.$version.minor"
 
-# Install into the mini_chromium/ subdirectory of, say, /usr/include/. Note that
-# header is included as <base/...> so we need to add -I/usr/include/mini_chromium/base
-# to pkg-config.
+# Install into the mini_chromium/ subdirectory of, say, /usr/include/. Note
+# that headers could be included as <mini_chromium/base/...> or <base/...>
+# (see above) so we need to add -I/usr/include/mini_chromium to pkg-config.
 #
-lib{mini_chromium}: cxx.pkgconfig.include = include/mini_chromium/base
+lib{mini_chromium}: cxx.pkgconfig.include = include/ include/mini_chromium/
 
 {hxx ixx txx}{*}:
 {

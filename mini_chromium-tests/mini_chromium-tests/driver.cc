@@ -1,5 +1,6 @@
 #include <string>
-#include <base/files/file_path.h>
+
+#include <mini_chromium/base/files/file_path.h>
 
 #undef NDEBUG
 #include <cassert>
@@ -13,6 +14,6 @@ int main()
 #elif BUILDFLAG(IS_WIN)
         const auto filepath = base::FilePath(L"path/to/file");
         assert(std::wstring(L"file") == filepath.BaseName().value());
-#endif        
+#endif
     }
 }
