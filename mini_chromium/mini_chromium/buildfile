@@ -125,6 +125,11 @@ switch $cxx.target.class
                     -D_CRT_SECURE_NO_WARNINGS \
                     -DNOMINMAX \
                     -DWIN32_LEAN_AND_MEAN
+                    
+    if ($cxx.target.system != 'mingw32')
+    {
+      cxx.libs = advapi32.lib
+    }
   }
 }
 
