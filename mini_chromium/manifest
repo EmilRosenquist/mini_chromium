@@ -5,6 +5,12 @@ summary: Small collection of useful low-level C++ routines from the Chromium ope
 license: BSD-3-Clause
 description-file: README.md
 url: https://chromium.googlesource.com/chromium/mini_chromium
+
+builds: default
+builds: -freebsd          ; FreeBSD is not supported by upstream.
+builds: -( +macos &gcc )  ; Homebrew GCC is not supported by upstream.
+
 depends: * build2 >= 0.15.0
 depends: * bpkg >= 0.15.0
+
 tests: mini_chromium-tests == $
