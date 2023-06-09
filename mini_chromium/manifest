@@ -1,6 +1,6 @@
 : 1
 name: mini_chromium
-version: 0.1.1-a.0.z
+version: 0.1.1
 summary: Small collection of useful low-level C++ routines from the Chromium open-source project
 license: BSD-3-Clause
 description-file: README.md
